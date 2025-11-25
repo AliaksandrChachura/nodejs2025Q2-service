@@ -1,15 +1,15 @@
 import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
+import { UpdatePasswordDto as IUpdatePasswordDto } from '../interfaces/update-password.interface';
 
-export class UpdateUserDto {
+class UpdateUserDto implements IUpdatePasswordDto {
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
-  @MaxLength(30)
   oldPassword: string;
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
   @MaxLength(30)
   newPassword: string;
 }
+
+export { UpdateUserDto };

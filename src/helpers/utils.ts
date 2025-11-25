@@ -1,7 +1,12 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
+import { isUUID } from 'class-validator';
 
 function generateUuid(): string {
-  return uuidv4();
+  return randomUUID();
 }
 
-export { generateUuid };
+function uuidValidate(uuid: string): boolean {
+  return isUUID(uuid);
+}
+
+export { generateUuid, uuidValidate };

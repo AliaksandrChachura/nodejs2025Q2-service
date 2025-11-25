@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
+import { CreateUserDto as ICreateUserDto } from '../interfaces/create-user.interface';
 
-export class CreateUserDto {
-
+class CreateUserDto implements ICreateUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
@@ -14,3 +14,5 @@ export class CreateUserDto {
   @MaxLength(30)
   password: string;
 }
+
+export { CreateUserDto };

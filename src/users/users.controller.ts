@@ -1,9 +1,10 @@
-import { Controller, Get, HttpCode, Post, Header, Param, Put, Delete, InternalServerErrorException } from '@nestjs/common';
-import type { User } from './types';
+import { Controller, Get, HttpCode, Post, Header, Param, Put, Delete, Body, HttpException, ParseUUIDPipe } from '@nestjs/common';
+import type { User } from './interfaces/user.interface';
 import { generateUuid } from '../helpers/utils';
-import { CreateUserDto } from './create-user.dto';
-import { UpdateUserDto } from './update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
+import { ErrorMessage, HttpStatus } from '../helpers/constants';
 
 @Controller('user')
 export class UsersController {
@@ -13,30 +14,29 @@ export class UsersController {
   @Header('Accept', 'application/json')
   @HttpCode(200)
   async getUsers(): Promise<User[]> {
-    try {
       return await this.usersService.findAll();
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to get users');
-    }
   }
 
   @Get(':id')
   @Header('Accept', 'application/json')
   @HttpCode(200)
-  async getUserById(@Param('id') id: string): Promise<User> {
-    try {
-      return await this.usersService.findById(id);
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to get user by id');
+  async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<Omit<User, 'password'>> {
+
+    const user = await this.usersService.findById(id);
+
+    if (!user) {
+      throw new HttpException(ErrorMessage.UserNotFound, HttpStatus.NOT_FOUND);
     }
+
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   @Post()
   @Header('Accept', 'application/json')
   @HttpCode(201)
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    try {
-      return await this.usersService.create({
+  async create(@Body() createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+      const user = await this.usersService.create({
         id: generateUuid(),
         login: createUserDto.login,
         password: createUserDto.password,
@@ -44,38 +44,48 @@ export class UsersController {
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to create user');
-    }
+
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
   }
 
   @Put(':id')
   @Header('Accept', 'application/json')
   @HttpCode(200)
-  async updateUserById(@Param('id') id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    try {
-      return await this.usersService.update(id, {
-        id,
-        login: 'test',
-        password: updateUserDto.newPassword,
-        version: 1,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to update user');
+  async updateUserById(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
+    const existingUser = await this.usersService.findById(id);
+
+    if (!existingUser) {
+      throw new HttpException(ErrorMessage.UserNotFound, HttpStatus.NOT_FOUND);
     }
+
+    if (existingUser.password !== updateUserDto.oldPassword) {
+      throw new HttpException(ErrorMessage.InvalidPassword, HttpStatus.FORBIDDEN);
+    }
+
+    const updatedUser = await this.usersService.update(id, {
+      id,
+      login: existingUser.login,
+      password: updateUserDto.newPassword,
+      version: existingUser.version + 1,
+      createdAt: existingUser.createdAt,
+      updatedAt: Date.now(),
+    });
+
+    const { password, ...userWithoutPassword } = updatedUser;
+    return userWithoutPassword;
   }
 
   @Delete(':id')
   @Header('Accept', 'application/json')
   @HttpCode(204)
-  async deleteUserById(@Param('id') id: string): Promise<void> {
-    try {
-      await this.usersService.delete(id);
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to delete user');
+  async deleteUserById(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    const user = await this.usersService.findById(id);
+
+    if (!user) {
+      throw new HttpException(ErrorMessage.UserNotFound, HttpStatus.NOT_FOUND);
     }
-    return;
+
+    await this.usersService.delete(id);
   }
 }
