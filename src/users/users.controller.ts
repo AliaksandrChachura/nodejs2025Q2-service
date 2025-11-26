@@ -20,7 +20,7 @@ export class UsersController {
   @Get(':id')
   @Header('Accept', 'application/json')
   @HttpCode(200)
-  async getUserById(@Param('id', ParseUUIDPipe) id: string): Promise<Omit<User, 'password'>> {
+  async getUserById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<Omit<User, 'password'>> {
 
     const user = await this.usersService.findById(id);
 
@@ -52,7 +52,7 @@ export class UsersController {
   @Put(':id')
   @Header('Accept', 'application/json')
   @HttpCode(200)
-  async updateUserById(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
+  async updateUserById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
     const existingUser = await this.usersService.findById(id);
 
     if (!existingUser) {
@@ -79,7 +79,7 @@ export class UsersController {
   @Delete(':id')
   @Header('Accept', 'application/json')
   @HttpCode(204)
-  async deleteUserById(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async deleteUserById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string): Promise<void> {
     const user = await this.usersService.findById(id);
 
     if (!user) {

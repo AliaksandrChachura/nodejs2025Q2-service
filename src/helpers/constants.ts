@@ -23,6 +23,7 @@ enum HttpStatus {
     InvalidJSON = 'Invalid JSON in request body',
     EndpointNotFound = 'Endpoint not found',
     InvalidPassword = 'Invalid password',
+    TrackNotFound = 'Track not found',
   }
 
   export { HttpStatus, ErrorMessage };
