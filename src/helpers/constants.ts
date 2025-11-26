@@ -24,6 +24,8 @@ enum HttpStatus {
     EndpointNotFound = 'Endpoint not found',
     InvalidPassword = 'Invalid password',
     TrackNotFound = 'Track not found',
+    ArtistNotFound = 'Artist not found',
+    AlbumNotFound = 'Album not found',
   }
 
   export { HttpStatus, ErrorMessage };

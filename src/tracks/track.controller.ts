@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, HttpException, NotFoundException, ParseUUIDPipe, Header } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, HttpException, ParseUUIDPipe, Header } from '@nestjs/common';
 import { TrackService } from './track.service';
-import Track from './interfaces/track.interface';
+import { Track } from './interfaces/track.interface';
 import { ErrorMessage } from '../helpers/constants';
 import { generateUuid } from '../helpers/utils';
 import { CreateTrackDto } from './dto/create-track.dto';

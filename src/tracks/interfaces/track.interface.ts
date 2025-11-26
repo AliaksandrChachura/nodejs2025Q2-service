@@ -6,4 +6,4 @@ interface Track {
     duration: number; // integer number
   }
 
-  export default Track;
+export { Track };
