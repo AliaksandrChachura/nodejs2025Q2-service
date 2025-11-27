@@ -3,6 +3,7 @@ import { Artist } from "./interfaces/artist.interface"
 import { ErrorMessage } from "../helpers/constants"
 import { ArtistService } from "./artist.service"
 import { TrackService } from "../tracks/track.service"
+import { AlbumService } from "../albums/album.service"
 import { CreateArtistDto } from "./dto/create-artist.dto"
 import { UpdateArtistDto } from "./dto/update-artist.dto"
 import { generateUuid } from "../helpers/utils"
@@ -10,7 +11,7 @@ import { generateUuid } from "../helpers/utils"
 
 @Controller('artist')
 export class ArtistController {
-    constructor (private readonly artistService: ArtistService, private readonly trackService: TrackService) {}
+    constructor (private readonly artistService: ArtistService, private readonly trackService: TrackService, private readonly albumService: AlbumService) {}
 
     @Get()
     @Header('Accept', 'application/json')
@@ -76,6 +77,18 @@ export class ArtistController {
             tracksToUpdate.map(track =>
                 this.trackService.update(track.id, {
                     ...track,
+                    artistId: null,
+                })
+            )
+        );
+
+        const albums = await this.albumService.findAll();
+        const albumsToUpdate = albums.filter(album => album.artistId === id);
+        
+        await Promise.all(
+            albumsToUpdate.map(album =>
+                this.albumService.update(album.id, {
+                    ...album,
                     artistId: null,
                 })
             )
