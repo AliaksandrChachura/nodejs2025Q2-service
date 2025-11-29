@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { Album } from "./interfaces/album.interface";
+import { Injectable } from '@nestjs/common';
+import { Album } from './interfaces/album.interface';
 
 @Injectable()
 export class AlbumService {
@@ -16,7 +16,7 @@ export class AlbumService {
   async create(album: Album): Promise<Album> {
     this.albums.set(album.id, album);
     return album;
-  } 
+  }
 
   async update(id: string, album: Album): Promise<Album> {
     this.albums.set(id, album);

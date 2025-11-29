@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './interfaces/user.interface';
-import { UpdatePasswordDto } from './interfaces/update-password.interface';
 
 @Injectable()
 export class UsersService {

@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, HttpException, ParseUUIDPipe, Header } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  HttpException,
+  ParseUUIDPipe,
+  Header,
+} from '@nestjs/common';
 import { TrackService } from './track.service';
 import { Track } from './interfaces/track.interface';
 import { ErrorMessage } from '../helpers/constants';
@@ -20,7 +33,9 @@ export class TrackController {
   @Get(':id')
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
-  async findById(@Param('id', ParseUUIDPipe) id: string): Promise<Omit<Track, 'artistId' | 'albumId'>> {
+  async findById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<Omit<Track, 'artistId' | 'albumId'>> {
     const track = await this.trackService.findById(id);
 
     if (!track) {
@@ -40,14 +55,17 @@ export class TrackController {
       artistId: createTrackDto.artistId ?? null,
       albumId: createTrackDto.albumId ?? null,
     });
-    
+
     return createdTrack;
   }
 
   @Put(':id')
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateTrackDto: UpdateTrackDto): Promise<Track> {
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateTrackDto: UpdateTrackDto,
+  ): Promise<Track> {
     const existingTrack = await this.trackService.findById(id);
 
     if (!existingTrack) {

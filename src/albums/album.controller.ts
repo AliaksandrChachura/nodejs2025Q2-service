@@ -1,15 +1,31 @@
-import { Controller, Get, Header, HttpCode, HttpStatus, HttpException, ParseUUIDPipe, Param, Put, Post, Body, Delete } from '@nestjs/common'
-import { Album } from "./interfaces/album.interface"
-import { ErrorMessage } from "../helpers/constants"
-import { AlbumService } from "./album.service"
-import { CreateAlbumDto } from "./dto/create-album.dto"
-import { UpdateAlbumDto } from "./dto/update-album.dto"
-import { generateUuid } from "../helpers/utils"
-import { TrackService } from "../tracks/track.service"
+import {
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  HttpStatus,
+  HttpException,
+  ParseUUIDPipe,
+  Param,
+  Put,
+  Post,
+  Body,
+  Delete,
+} from '@nestjs/common';
+import { Album } from './interfaces/album.interface';
+import { ErrorMessage } from '../helpers/constants';
+import { AlbumService } from './album.service';
+import { CreateAlbumDto } from './dto/create-album.dto';
+import { UpdateAlbumDto } from './dto/update-album.dto';
+import { generateUuid } from '../helpers/utils';
+import { TrackService } from '../tracks/track.service';
 
 @Controller('album')
 export class AlbumController {
-  constructor(private readonly albumService: AlbumService, private readonly trackService: TrackService) {}
+  constructor(
+    private readonly albumService: AlbumService,
+    private readonly trackService: TrackService,
+  ) {}
 
   @Get()
   @Header('Accept', 'application/json')
@@ -42,7 +58,10 @@ export class AlbumController {
     });
 
     if (!album) {
-      throw new HttpException(ErrorMessage.InvalidRequestBody, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        ErrorMessage.InvalidRequestBody,
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return album;
   }
@@ -50,7 +69,10 @@ export class AlbumController {
   @Put(':id')
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateAlbumDto: UpdateAlbumDto): Promise<Album> {
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateAlbumDto: UpdateAlbumDto,
+  ): Promise<Album> {
     const existingAlbum = await this.albumService.findById(id);
 
     if (!existingAlbum) {
@@ -62,11 +84,11 @@ export class AlbumController {
       year: updateAlbumDto.year ?? null,
       artistId: updateAlbumDto.artistId ?? null,
     });
-    
+
     return album;
   }
 
-  @Delete(':id')    
+  @Delete(':id')
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
@@ -76,18 +98,17 @@ export class AlbumController {
       throw new HttpException(ErrorMessage.AlbumNotFound, HttpStatus.NOT_FOUND);
     }
     const tracks = await this.trackService.findAll();
-    const tracksToUpdate = tracks.filter(track => track.albumId === id);
-
+    const tracksToUpdate = tracks.filter((track) => track.albumId === id);
 
     await Promise.all(
-      tracksToUpdate.map(track =>
+      tracksToUpdate.map((track) =>
         this.trackService.update(track.id, {
           ...track,
           albumId: null,
-        })
-      )
+        }),
+      ),
     );
 
     await this.albumService.delete(id);
-  } 
+  }
 }

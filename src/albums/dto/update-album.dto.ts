@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsNumber, IsString, IsOptional, ValidateIf, IsUUID } from "class-validator";
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsOptional,
+  ValidateIf,
+  IsUUID,
+} from 'class-validator';
 
 export class UpdateAlbumDto {
   @IsString()

@@ -1,6 +1,6 @@
 interface CreateUserDto {
-    login: string;
-    password: string;
+  login: string;
+  password: string;
 }
 
 export { CreateUserDto };
