@@ -27,6 +27,16 @@ After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
+### Swagger Documentation
+
+The Swagger documentation provides an interactive API testing interface where you can:
+- View all available endpoints with detailed descriptions
+- See request/response schemas and examples
+- Test API endpoints directly from the browser
+- Understand data validation rules and error responses
+
+For more information about OpenAPI/Swagger, please visit https://swagger.io/.
+
 ## Testing
 
 After application running open new terminal and enter:
