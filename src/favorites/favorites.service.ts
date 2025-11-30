@@ -45,7 +45,6 @@ export class FavoritesService {
       favorite.tracks.map((id) => this.trackService.findById(id)),
     );
     const tracks = tracksResults.filter((track) => track !== undefined);
-    console.log('tracks: ', tracks, 'artists: ', artists, 'albums: ', albums);
     return { artists, albums, tracks };
   }
 

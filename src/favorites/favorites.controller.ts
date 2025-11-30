@@ -40,7 +40,7 @@ export class FavoritesController {
 
   @Post('track/:id')
   @ApiCreatedResponse({
-    description: 'The track has been added to the favorites',
+    description: 'Added successfully',
   })
   @HttpCode(HttpStatus.CREATED)
   @Header('Accept', 'application/json')
@@ -62,7 +62,7 @@ export class FavoritesController {
 
   @Post('artist/:id')
   @ApiCreatedResponse({
-    description: 'The artist has been added to the favorites',
+    description: 'Added successfully',
   })
   @HttpCode(HttpStatus.CREATED)
   @Header('Accept', 'application/json')
@@ -84,7 +84,7 @@ export class FavoritesController {
 
   @Post('album/:id')
   @ApiCreatedResponse({
-    description: 'The album has been added to the favorites',
+    description: 'Added successfully',
   })
   @HttpCode(HttpStatus.CREATED)
   @Header('Accept', 'application/json')
