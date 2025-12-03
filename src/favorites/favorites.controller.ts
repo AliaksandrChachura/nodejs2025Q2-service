@@ -13,10 +13,15 @@ import { FavoritesService } from './favorites.service';
 import { ArtistService } from 'src/artists/artist.service';
 import { AlbumService } from 'src/albums/album.service';
 import { TrackService } from 'src/tracks/track.service';
-import { ApiCreatedResponse } from '@nestjs/swagger';
+import { FavoritesResponseDto } from './dto/favorites-response.dto';
+import { TrackResponseDto } from 'src/tracks/dto/track-response.dto';
+import { ArtistResponseDto } from 'src/artists/dto/artist-response.dto';
+import { AlbumResponseDto } from 'src/albums/dto/album-response.dto';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Artist } from 'src/artists/interfaces/artist.interface';
 import { Album } from 'src/albums/interfaces/album.interface';
 import { Track } from 'src/tracks/interfaces/track.interface';
+import { ErrorMessage } from 'src/helpers/constants';
 
 @Controller('favs')
 export class FavoritesController {
@@ -28,6 +33,12 @@ export class FavoritesController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all favorites' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: FavoritesResponseDto,
+  })
   @HttpCode(HttpStatus.OK)
   @Header('Accept', 'application/json')
   async findAll(): Promise<{
@@ -39,8 +50,19 @@ export class FavoritesController {
   }
 
   @Post('track/:id')
-  @ApiCreatedResponse({
+  @ApiOperation({ summary: 'Add track to favorites' })
+  @ApiResponse({
+    status: 201,
     description: 'Added successfully',
+    type: TrackResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.TrackNotFound,
   })
   @HttpCode(HttpStatus.CREATED)
   @Header('Accept', 'application/json')
@@ -52,6 +74,19 @@ export class FavoritesController {
   }
 
   @Delete('track/:id')
+  @ApiOperation({ summary: 'Delete track from favorites' })
+  @ApiResponse({
+    status: 204,
+    description: 'Deleted successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.TrackNotFound,
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Header('Accept', 'application/json')
   async deleteTrackFromFavorites(
@@ -61,8 +96,19 @@ export class FavoritesController {
   }
 
   @Post('artist/:id')
-  @ApiCreatedResponse({
+  @ApiOperation({ summary: 'Add artist to favorites' })
+  @ApiResponse({
+    status: 201,
     description: 'Added successfully',
+    type: ArtistResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.ArtistNotFound,
   })
   @HttpCode(HttpStatus.CREATED)
   @Header('Accept', 'application/json')
@@ -74,6 +120,19 @@ export class FavoritesController {
   }
 
   @Delete('artist/:id')
+  @ApiOperation({ summary: 'Delete artist from favorites' })
+  @ApiResponse({
+    status: 204,
+    description: 'Deleted successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.ArtistNotFound,
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Header('Accept', 'application/json')
   async deleteArtistFromFavorites(
@@ -83,8 +142,19 @@ export class FavoritesController {
   }
 
   @Post('album/:id')
-  @ApiCreatedResponse({
+  @ApiOperation({ summary: 'Add album to the favorites' })
+  @ApiResponse({
+    status: 201,
     description: 'Added successfully',
+    type: AlbumResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.AlbumNotFound,
   })
   @HttpCode(HttpStatus.CREATED)
   @Header('Accept', 'application/json')
@@ -96,6 +166,19 @@ export class FavoritesController {
   }
 
   @Delete('album/:id')
+  @ApiOperation({ summary: 'Delete album from favorites' })
+  @ApiResponse({
+    status: 204,
+    description: 'Deleted successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.AlbumNotFound,
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Header('Accept', 'application/json')
   async deleteAlbumFromFavorites(

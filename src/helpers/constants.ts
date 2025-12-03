@@ -27,6 +27,7 @@ enum ErrorMessage {
   TrackNotFound = 'Track not found',
   ArtistNotFound = 'Artist not found',
   AlbumNotFound = 'Album not found',
+  InvalidRequestId = 'Invalid request ID (Not a valid UUID)',
 }
 
 export { HttpStatus, ErrorMessage };

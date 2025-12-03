@@ -18,12 +18,20 @@ import { ErrorMessage } from '../helpers/constants';
 import { generateUuid } from '../helpers/utils';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dts';
+import { TrackResponseDto } from './dto/track-response.dto';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('track')
 export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all tracks' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: [TrackResponseDto],
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<Track[]> {
@@ -31,6 +39,20 @@ export class TrackController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get track by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: TrackResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.TrackNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async findById(
@@ -45,6 +67,16 @@ export class TrackController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create track' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successful operation',
+    type: TrackResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestBody,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createTrackDto: CreateTrackDto): Promise<Track> {
@@ -60,6 +92,20 @@ export class TrackController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update track' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: TrackResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestBody,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.TrackNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async update(
@@ -82,6 +128,19 @@ export class TrackController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete track' })
+  @ApiResponse({
+    status: 204,
+    description: 'Successful operation',
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.TrackNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {

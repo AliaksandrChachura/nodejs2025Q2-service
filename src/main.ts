@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as yaml from 'yamljs';
+import { readFileSync } from 'fs';
 
 const PORT = process.env.PORT || 4000;
 
@@ -16,13 +18,9 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('Home Library Service')
-    .setDescription('The Home Library Service API')
-    .setVersion('1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('doc', app, document);
+  const swagger = readFileSync('doc/api.yaml', { encoding: 'utf-8' });
+  const parsedSwagger = yaml.parse(swagger);
+  SwaggerModule.setup('doc', app, parsedSwagger);
 
   await app.listen(PORT);
 }
