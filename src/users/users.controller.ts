@@ -10,6 +10,7 @@ import {
   Body,
   HttpException,
   ParseUUIDPipe,
+  ConflictException,
 } from '@nestjs/common';
 import type { User } from './interfaces/user.interface';
 import { generateUuid } from '../helpers/utils';
@@ -58,7 +59,7 @@ export class UsersController {
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<Omit<User, 'password'>> {
     const user = await this.usersService.findById(id);
-
+    
     if (!user) {
       throw new HttpException(ErrorMessage.UserNotFound, HttpStatus.NOT_FOUND);
     }
@@ -78,22 +79,35 @@ export class UsersController {
     status: 400,
     description: ErrorMessage.InvalidRequestBody,
   })
+  @ApiResponse({
+    status: 409,
+    description: ErrorMessage.UserAlreadyExists,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(201)
   async create(
     @Body() createUserDto: CreateUserDto,
   ): Promise<Omit<User, 'password'>> {
-    const user = await this.usersService.create({
-      id: generateUuid(),
-      login: createUserDto.login,
-      password: createUserDto.password,
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
+    try {
+      const user = await this.usersService.create({
+        id: generateUuid(),
+        login: createUserDto.login,
+        password: createUserDto.password,
+        version: 1,
+        createdAt: Math.floor(Date.now() / 1000),
+        updatedAt: Math.floor(Date.now() / 1000),
+      });
 
-    const { password: _password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+      const { password: _password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    } catch (error: any) {
+      // Handle Prisma unique constraint violation (duplicate login)
+      // P2002 is the error code for unique constraint violations
+      if (error?.code === 'P2002') {
+        throw new ConflictException(ErrorMessage.UserAlreadyExists);
+      }
+      throw error;
+    }
   }
 
   @Put(':id')
@@ -140,10 +154,11 @@ export class UsersController {
       password: updateUserDto.newPassword,
       version: existingUser.version + 1,
       createdAt: existingUser.createdAt,
-      updatedAt: Date.now(),
+      updatedAt: Math.floor(Date.now() / 1000),
     });
 
     const { password: _password, ...userWithoutPassword } = updatedUser;
+    console.log('userWithoutPassword', userWithoutPassword);
     return userWithoutPassword;
   }
 
