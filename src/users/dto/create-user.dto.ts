@@ -2,7 +2,7 @@ import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateUserDto as ICreateUserDto } from '../interfaces/create-user.interface';
 
-class CreateUserDto implements ICreateUserDto { 
+class CreateUserDto implements ICreateUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)

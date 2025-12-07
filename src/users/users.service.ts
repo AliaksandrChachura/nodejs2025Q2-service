@@ -37,25 +37,6 @@ export class UsersService {
     };
   }
 
-  // async findByLogin(login: string): Promise<User | null> {
-  //   const user = await this.prisma.user.findUnique({
-  //     where: { login },
-  //   });
-
-  //   if (!user) {
-  //     return null;
-  //   }
-
-  //   return {
-  //     id: user.id,
-  //     login: user.login,
-  //     password: user.password,
-  //     version: user.version,
-  //     createdAt: user.createdAt,
-  //     updatedAt: user.updatedAt,
-  //   };
-  // }
-
   async create(user: User): Promise<User> {
     const createdUser = await this.prisma.user.create({
       data: {
@@ -79,14 +60,25 @@ export class UsersService {
   }
 
   async update(id: string, user: User): Promise<User> {
-    const currentTimestamp = Math.floor(Date.now() / 1000);
+    // Get the existing user to ensure updatedAt is different from createdAt
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    
+  
+    let newUpdatedAt = Math.floor(Date.now() / 1000);
+
+    if (existingUser && newUpdatedAt === existingUser.createdAt) {
+      newUpdatedAt = existingUser.createdAt + 1;
+    }
+    
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: {
         login: user.login,
         password: user.password,
         version: user.version,
-        updatedAt: currentTimestamp,
+        updatedAt: newUpdatedAt,
       },
     });
 
