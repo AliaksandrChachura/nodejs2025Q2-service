@@ -30,7 +30,7 @@ RUN npm install --legacy-peer-deps
 # Copy prisma schema (needed for potential regeneration)
 COPY prisma ./prisma
 
-# Copy generated Prisma client from builder (avoids regeneration)
+# Copy generated Prisma client from builder
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 
@@ -41,9 +41,16 @@ COPY --from=builder /app/doc ./doc
 # Copy source code for development (will be overridden by volume mount in docker-compose)
 COPY . .
 
-# If you have env files, you’ll usually mount them or use docker env vars
+# Copy and set up entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# If you have env files, you'll usually mount them or use docker env vars
 # EXPOSE just documents the port
 EXPOSE 4000
+
+# Use entrypoint to run migrations before starting the app
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Default command
 # CMD ["node", "dist/main.js"]

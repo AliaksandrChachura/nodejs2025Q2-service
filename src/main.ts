@@ -7,27 +7,10 @@ import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { load } from 'js-yaml';
 import { readFileSync } from 'fs';
 import { PrismaService } from './prisma/prisma.service';
-import { execSync } from 'child_process';
 
 const PORT = process.env.PORT || 4000;
 
-async function runMigrations() {
-  try {
-    console.log('Running database migrations...');
-    execSync('npx prisma migrate deploy', {
-      stdio: 'inherit',
-      env: process.env,
-    });
-    console.log('Migrations completed successfully');
-  } catch (error) {
-    console.error('Migration failed:', error);
-    throw error;
-  }
-}
-
 async function bootstrap() {
-  await runMigrations();
-
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
