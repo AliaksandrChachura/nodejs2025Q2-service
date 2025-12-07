@@ -23,7 +23,13 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "generate:openapi": "ts-node -r tsconfig-paths/register src/scripts/generate-openapi.ts"
+    "generate:openapi": "ts-node -r tsconfig-paths/register src/scripts/generate-openapi.ts",
+    "migration:generate": "prisma migrate dev",
+    "migration:create": "prisma migrate dev --create-only",
+    "migration:run": "prisma migrate deploy",
+    "migration:revert": "prisma migrate resolve --rolled-back",
+    "migration:show": "prisma migrate status",
+    "docker:scout": "docker scout quickview"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.16",
