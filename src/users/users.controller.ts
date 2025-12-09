@@ -15,14 +15,22 @@ import type { User } from './interfaces/user.interface';
 import { generateUuid } from '../helpers/utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { UsersService } from './users.service';
 import { ErrorMessage, HttpStatus } from '../helpers/constants';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: [UserResponseDto],
+  })
   @Header('Accept', 'application/json')
   @HttpCode(200)
   async getUsers(): Promise<User[]> {
@@ -30,6 +38,20 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get user by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidUserId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.UserNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(200)
   async getUserById(
@@ -46,6 +68,16 @@ export class UsersController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create user' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successful operation',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestBody,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(201)
   async create(
@@ -56,8 +88,8 @@ export class UsersController {
       login: createUserDto.login,
       password: createUserDto.password,
       version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: Math.floor(Date.now() / 1000),
+      updatedAt: Math.floor(Date.now() / 1000),
     });
 
     const { password: _password, ...userWithoutPassword } = user;
@@ -65,6 +97,24 @@ export class UsersController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update user by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidUserId,
+  })
+  @ApiResponse({
+    status: 403,
+    description: ErrorMessage.InvalidPassword,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.UserNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(200)
   async updateUserById(
@@ -90,7 +140,7 @@ export class UsersController {
       password: updateUserDto.newPassword,
       version: existingUser.version + 1,
       createdAt: existingUser.createdAt,
-      updatedAt: Date.now(),
+      updatedAt: existingUser.updatedAt, // Will be overridden by service with current timestamp
     });
 
     const { password: _password, ...userWithoutPassword } = updatedUser;
@@ -98,6 +148,19 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete user by id' })
+  @ApiResponse({
+    status: 204,
+    description: 'Successful operation',
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidUserId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.UserNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(204)
   async deleteUserById(

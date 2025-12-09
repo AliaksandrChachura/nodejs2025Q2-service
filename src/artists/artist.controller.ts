@@ -19,7 +19,9 @@ import { TrackService } from '../tracks/track.service';
 import { AlbumService } from '../albums/album.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { ArtistResponseDto } from './dto/artist-response.dto';
 import { generateUuid } from '../helpers/utils';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('artist')
 export class ArtistController {
@@ -30,6 +32,12 @@ export class ArtistController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all artists' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: [ArtistResponseDto],
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async findAll() {
@@ -37,6 +45,20 @@ export class ArtistController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get artist by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: ArtistResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.ArtistNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async findById(@Param('id', ParseUUIDPipe) id: string): Promise<Artist> {
@@ -52,6 +74,16 @@ export class ArtistController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create artist' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successful operation',
+    type: ArtistResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestBody,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createArtistDto: CreateArtistDto): Promise<Artist> {
@@ -63,6 +95,20 @@ export class ArtistController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update artist' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: ArtistResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestBody,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.ArtistNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async update(
@@ -86,6 +132,19 @@ export class ArtistController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete artist' })
+  @ApiResponse({
+    status: 204,
+    description: 'Successful operation',
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.ArtistNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {

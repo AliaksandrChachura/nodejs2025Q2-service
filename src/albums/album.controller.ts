@@ -19,6 +19,8 @@ import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { generateUuid } from '../helpers/utils';
 import { TrackService } from '../tracks/track.service';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AlbumResponseDto } from './dto/album-response.dto';
 
 @Controller('album')
 export class AlbumController {
@@ -28,6 +30,12 @@ export class AlbumController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all albums' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: [AlbumResponseDto],
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<Album[]> {
@@ -35,6 +43,20 @@ export class AlbumController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get album by id' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: AlbumResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.AlbumNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async findById(@Param('id', ParseUUIDPipe) id: string): Promise<Album> {
@@ -47,6 +69,16 @@ export class AlbumController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create album' })
+  @ApiResponse({
+    status: 201,
+    description: 'Successful operation',
+    type: AlbumResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestBody,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createAlbumDto: CreateAlbumDto): Promise<Album> {
@@ -67,6 +99,20 @@ export class AlbumController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Update album' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful operation',
+    type: AlbumResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestBody,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.AlbumNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.OK)
   async update(
@@ -89,6 +135,19 @@ export class AlbumController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete album' })
+  @ApiResponse({
+    status: 204,
+    description: 'Successful operation',
+  })
+  @ApiResponse({
+    status: 400,
+    description: ErrorMessage.InvalidRequestId,
+  })
+  @ApiResponse({
+    status: 404,
+    description: ErrorMessage.AlbumNotFound,
+  })
   @Header('Accept', 'application/json')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {

@@ -1,29 +1,100 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './interfaces/user.interface';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  private users: Map<string, User> = new Map();
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<User[]> {
-    return Array.from(this.users.values());
+    const users = await this.prisma.user.findMany();
+    return users.map((user) => ({
+      id: user.id,
+      login: user.login,
+      password: user.password,
+      version: user.version,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }));
   }
 
-  async findById(id: string): Promise<User> {
-    return this.users.get(id);
+  async findById(id: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      login: user.login,
+      password: user.password,
+      version: user.version,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   async create(user: User): Promise<User> {
-    this.users.set(user.id, user);
-    return user;
+    const createdUser = await this.prisma.user.create({
+      data: {
+        id: user.id,
+        login: user.login,
+        password: user.password,
+        version: user.version,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+    });
+
+    return {
+      id: createdUser.id,
+      login: createdUser.login,
+      password: createdUser.password,
+      version: createdUser.version,
+      createdAt: createdUser.createdAt,
+      updatedAt: createdUser.updatedAt,
+    };
   }
 
   async update(id: string, user: User): Promise<User> {
-    this.users.set(id, user);
-    return user;
+    // Get the existing user to ensure updatedAt is different from createdAt
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    
+  
+    let newUpdatedAt = Math.floor(Date.now() / 1000);
+
+    if (existingUser && newUpdatedAt === existingUser.createdAt) {
+      newUpdatedAt = existingUser.createdAt + 1;
+    }
+    
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        login: user.login,
+        password: user.password,
+        version: user.version,
+        updatedAt: newUpdatedAt,
+      },
+    });
+
+    return {
+      id: updatedUser.id,
+      login: updatedUser.login,
+      password: updatedUser.password,
+      version: updatedUser.version,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+    };
   }
 
   async delete(id: string): Promise<void> {
-    this.users.delete(id);
+    await this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
