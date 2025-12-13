@@ -7,6 +7,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
 import { LoggingService } from '../logging/logging.service';
 
 export interface ErrorResponse {
@@ -50,8 +51,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
-      } else if (typeof exceptionResponse === 'object') {
-        const responseObj = exceptionResponse as any;
+      } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+        const responseObj = exceptionResponse as { message?: string | string[]; error?: string };
         message = responseObj.message || exception.message;
         error = responseObj.error;
       } else {
@@ -66,11 +67,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         error = 'Validation Error';
       }
     } else if (exception instanceof Error) {
-      if (exception.name === 'PrismaClientKnownRequestError') {
-        status = this.handlePrismaError(exception as any);
-        message = this.getPrismaErrorMessage(exception as any);
+      if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+        status = this.handlePrismaError(exception);
+        message = this.getPrismaErrorMessage(exception);
         error = 'Database Error';
-      } else if (exception.name === 'PrismaClientValidationError') {
+      } else if (exception instanceof Prisma.PrismaClientValidationError) {
         status = HttpStatus.BAD_REQUEST;
         message = 'Invalid database query';
         error = 'Validation Error';
@@ -90,7 +91,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
     };
   }
 
-  private handlePrismaError(error: any): HttpStatus {
+  private handlePrismaError(
+    error: Prisma.PrismaClientKnownRequestError,
+  ): HttpStatus {
     switch (error.code) {
       case 'P2002':
         return HttpStatus.CONFLICT;
@@ -103,16 +106,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
   }
 
-  private getPrismaErrorMessage(error: any): string {
+  private getPrismaErrorMessage(
+    error: Prisma.PrismaClientKnownRequestError,
+  ): string {
     switch (error.code) {
-      case 'P2002':
+      case 'P2002': {
         const target = error.meta?.target;
         if (Array.isArray(target) && target.length > 0) {
           return `${target.join(', ')} already exists`;
         }
         return 'A record with this value already exists';
+      }
       case 'P2025':
-        return error.meta?.cause || 'Record not found';
+        return (typeof error.meta?.cause === 'string' ? error.meta.cause : undefined) || 'Record not found';
       case 'P2003':
         return 'Invalid reference to related record';
       default:
@@ -137,7 +143,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       errorMessage =
         typeof exceptionResponse === 'string'
           ? exceptionResponse
-          : (exceptionResponse as any).message || exception.message;
+          : (typeof exceptionResponse === 'object' && exceptionResponse !== null
+              ? (exceptionResponse as { message?: string }).message
+              : undefined) || exception.message;
       stack = exception.stack;
     } else if (exception instanceof Error) {
       errorMessage = exception.message;

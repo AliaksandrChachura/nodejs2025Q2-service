@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { appendFileSync, existsSync, statSync, renameSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 
-export type LogLevel = 'error' | 'warn' | 'log' | 'verbose' | 'debug' | 'silly';
+// Nest.js standard logging levels (in priority order: 0 = highest, 4 = lowest)
+export type LogLevel = 'error' | 'warn' | 'log' | 'debug' | 'verbose';
 
 @Injectable()
 export class LoggingService {
@@ -10,30 +11,30 @@ export class LoggingService {
     error: 0,
     warn: 1,
     log: 2,
-    verbose: 3,
-    debug: 4,
-    silly: 5,
+    debug: 3,
+    verbose: 4,
   };
 
   private readonly currentLevel: LogLevel;
   private readonly logFilePath?: string;
   private readonly maxSizeBytes?: number;
 
-  private readonly colors = {
+  private readonly colors: Record<LogLevel, string> = {
     error: '\x1b[31m', // Red
     warn: '\x1b[33m', // Yellow
     log: '\x1b[36m', // Cyan
-    verbose: '\x1b[35m', // Magenta
     debug: '\x1b[34m', // Blue
-    silly: '\x1b[90m', // Gray
-    reset: '\x1b[0m',
+    verbose: '\x1b[35m', // Magenta
   };
+  private readonly reset = '\x1b[0m';
 
   constructor() {
-    const envLevel = (process.env.LOG_LEVEL || 'log') as LogLevel;
+    const envLevel = (process.env.LOG_LEVEL || 'log').toLowerCase() as LogLevel;
 
     if (!this.isValidLogLevel(envLevel)) {
-      throw new Error(`Invalid log level: ${envLevel}`);
+      throw new Error(
+        `Invalid log level: ${envLevel}. Valid levels are: ${Object.keys(this.levelOrder).join(', ')}`,
+      );
     }
 
     this.currentLevel = envLevel;
@@ -90,9 +91,8 @@ export class LoggingService {
       error: 'error',
       warn: 'warn',
       log: 'log',
-      verbose: 'log',
       debug: 'debug',
-      silly: 'log',
+      verbose: 'log',
     };
     return consoleMethodMap[level];
   }
@@ -105,12 +105,11 @@ export class LoggingService {
     const formattedMessage = this.formatMessage(level, message, context);
 
     const color = this.colors[level];
-    const reset = this.colors.reset;
     const consoleMethod = this.getConsoleMethod(level);
-    
+
     // Use console.log as fallback if method doesn't exist (e.g., debug in some environments)
     const method = console[consoleMethod] || console.log;
-    method.call(console, `${color}${formattedMessage}${reset}`);
+    method.call(console, `${color}${formattedMessage}${this.reset}`);
 
     this.writeToFile(formattedMessage);
   }
@@ -127,15 +126,11 @@ export class LoggingService {
     this.logMessage('log', message, context);
   }
 
-  verbose(message: string, context?: string): void {
-    this.logMessage('verbose', message, context);
-  }
-
   debug(message: string, context?: string): void {
     this.logMessage('debug', message, context);
   }
 
-  silly(message: string, context?: string): void {
-    this.logMessage('silly', message, context);
+  verbose(message: string, context?: string): void {
+    this.logMessage('verbose', message, context);
   }
 }
