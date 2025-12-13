@@ -7,11 +7,15 @@ import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { load } from 'js-yaml';
 import { readFileSync } from 'fs';
 import { PrismaService } from './prisma/prisma.service';
+import { LoggingService } from './logging/logging.service';
 
 const PORT = process.env.PORT || 4000;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  
+  const loggingService = app.get(LoggingService);
+  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -24,11 +28,10 @@ async function bootstrap() {
   const parsedSwagger = load(swagger) as OpenAPIObject;
   SwaggerModule.setup('doc', app, parsedSwagger);
 
-  // Enable Prisma shutdown hooks
   const prismaService = app.get(PrismaService);
   await prismaService.enableShutdownHooks(app);
 
   await app.listen(PORT);
-  console.log(`Application is running on: http://localhost:${PORT}`);
+  loggingService.log(`Application is running on: http://localhost:${PORT}`, 'Bootstrap');
 }
 bootstrap();
