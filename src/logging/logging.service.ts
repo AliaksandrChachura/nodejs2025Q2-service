@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { appendFileSync, existsSync, statSync, renameSync, mkdirSync } from 'fs';
+import {
+  appendFileSync,
+  existsSync,
+  statSync,
+  renameSync,
+  mkdirSync,
+} from 'fs';
 import { dirname } from 'path';
 
 // Nest.js standard logging levels (in priority order: 0 = highest, 4 = lowest)
@@ -59,7 +65,11 @@ export class LoggingService {
     return this.levelOrder[level] <= this.levelOrder[this.currentLevel];
   }
 
-  private formatMessage(level: LogLevel, message: string, context?: string): string {
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    context?: string,
+  ): string {
     const timestamp = new Date().toISOString();
     const contextStr = context ? `[${context}]` : '';
     return `${timestamp} ${level.toUpperCase().padEnd(7)} ${contextStr} ${message}`;

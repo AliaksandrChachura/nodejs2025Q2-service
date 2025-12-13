@@ -51,8 +51,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
-      } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-        const responseObj = exceptionResponse as { message?: string | string[]; error?: string };
+      } else if (
+        typeof exceptionResponse === 'object' &&
+        exceptionResponse !== null
+      ) {
+        const responseObj = exceptionResponse as {
+          message?: string | string[];
+          error?: string;
+        };
         message = responseObj.message || exception.message;
         error = responseObj.error;
       } else {
@@ -118,7 +124,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         return 'A record with this value already exists';
       }
       case 'P2025':
-        return (typeof error.meta?.cause === 'string' ? error.meta.cause : undefined) || 'Record not found';
+        return (
+          (typeof error.meta?.cause === 'string'
+            ? error.meta.cause
+            : undefined) || 'Record not found'
+        );
       case 'P2003':
         return 'Invalid reference to related record';
       default:
@@ -126,11 +136,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
   }
 
-  private logError(
-    exception: unknown,
-    request: Request,
-    status: number,
-  ): void {
+  private logError(exception: unknown, request: Request, status: number): void {
     const { method, url, body, query, params } = request;
     const userAgent = request.get('user-agent') || '';
     const ip = request.ip || request.connection.remoteAddress;

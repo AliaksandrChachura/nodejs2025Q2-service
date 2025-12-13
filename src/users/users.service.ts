@@ -59,7 +59,10 @@ export class UsersService {
         },
       });
 
-      this.loggingService.log(`User created successfully: ${createdUser.id}`, 'UsersService');
+      this.loggingService.log(
+        `User created successfully: ${createdUser.id}`,
+        'UsersService',
+      );
       return {
         id: createdUser.id,
         login: createdUser.login,
@@ -69,7 +72,10 @@ export class UsersService {
         updatedAt: createdUser.updatedAt,
       };
     } catch (error) {
-      this.loggingService.error(`Failed to create user: ${error.message}`, 'UsersService');
+      this.loggingService.error(
+        `Failed to create user: ${error.message}`,
+        'UsersService',
+      );
       throw error;
     }
   }
@@ -79,14 +85,13 @@ export class UsersService {
     const existingUser = await this.prisma.user.findUnique({
       where: { id },
     });
-    
-  
+
     let newUpdatedAt = Math.floor(Date.now() / 1000);
 
     if (existingUser && newUpdatedAt === existingUser.createdAt) {
       newUpdatedAt = existingUser.createdAt + 1;
     }
-    
+
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: {
@@ -113,9 +118,15 @@ export class UsersService {
       await this.prisma.user.delete({
         where: { id },
       });
-      this.loggingService.log(`User deleted successfully: ${id}`, 'UsersService');
+      this.loggingService.log(
+        `User deleted successfully: ${id}`,
+        'UsersService',
+      );
     } catch (error) {
-      this.loggingService.error(`Failed to delete user: ${error.message}`, 'UsersService');
+      this.loggingService.error(
+        `Failed to delete user: ${error.message}`,
+        'UsersService',
+      );
       throw error;
     }
   }

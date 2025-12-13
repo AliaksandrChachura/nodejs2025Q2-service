@@ -42,8 +42,7 @@ function handleUnhandledRejection(
   promise: Promise<unknown>,
 ): void {
   const message = 'Unhandled Promise Rejection - Application will exit';
-  const error =
-    reason instanceof Error ? reason : new Error(String(reason));
+  const error = reason instanceof Error ? reason : new Error(String(reason));
 
   if (loggingService) {
     loggingService.error(
