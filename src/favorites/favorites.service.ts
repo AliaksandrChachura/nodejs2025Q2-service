@@ -9,6 +9,7 @@ import { Artist } from 'src/artists/interfaces/artist.interface';
 import { Album } from 'src/albums/interfaces/album.interface';
 import { Track } from 'src/tracks/interfaces/track.interface';
 import { PrismaService } from '../prisma/prisma.service';
+import { LoggingService } from '../logging/logging.service';
 
 @Injectable()
 export class FavoritesService {
@@ -19,6 +20,7 @@ export class FavoritesService {
     private readonly trackService: TrackService,
     private readonly artistService: ArtistService,
     private readonly albumService: AlbumService,
+    private readonly loggingService: LoggingService,
   ) {}
 
   private async getOrCreateFavorites() {
@@ -45,6 +47,7 @@ export class FavoritesService {
     albums: Album[];
     tracks: Track[];
   }> {
+    this.loggingService.debug('Fetching all favorites', 'FavoritesService');
     const favorites = await this.getOrCreateFavorites();
 
     const artistsResults = await Promise.all(
@@ -68,13 +71,25 @@ export class FavoritesService {
       (track): track is Track => track !== null,
     );
 
+    this.loggingService.verbose(
+      `Found ${artists.length} favorite artists, ${albums.length} favorite albums, ${tracks.length} favorite tracks`,
+      'FavoritesService',
+    );
     return { artists, albums, tracks };
   }
 
   async addTrackToFavorites(id: string): Promise<Favorites> {
+    this.loggingService.log(
+      `Adding track to favorites: ${id}`,
+      'FavoritesService',
+    );
     const track = await this.trackService.findById(id);
 
     if (!track) {
+      this.loggingService.warn(
+        `Track not found when adding to favorites: ${id}`,
+        'FavoritesService',
+      );
       throw new HttpException(
         ErrorMessage.TrackNotFound,
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -90,6 +105,15 @@ export class FavoritesService {
           favoriteTracks: [...favorites.favoriteTracks, id],
         },
       });
+      this.loggingService.log(
+        `Track added to favorites successfully: ${id}`,
+        'FavoritesService',
+      );
+    } else {
+      this.loggingService.debug(
+        `Track already in favorites: ${id}`,
+        'FavoritesService',
+      );
     }
 
     const updated = await this.getOrCreateFavorites();
@@ -101,9 +125,17 @@ export class FavoritesService {
   }
 
   async deleteTrackFromFavorites(id: string): Promise<void> {
+    this.loggingService.log(
+      `Removing track from favorites: ${id}`,
+      'FavoritesService',
+    );
     const track = await this.trackService.findById(id);
 
     if (!track) {
+      this.loggingService.warn(
+        `Track not found when removing from favorites: ${id}`,
+        'FavoritesService',
+      );
       throw new HttpException(ErrorMessage.TrackNotFound, HttpStatus.NOT_FOUND);
     }
 
@@ -118,12 +150,24 @@ export class FavoritesService {
         favoriteTracks: updatedTracks,
       },
     });
+    this.loggingService.log(
+      `Track removed from favorites successfully: ${id}`,
+      'FavoritesService',
+    );
   }
 
   async addArtistToFavorites(id: string): Promise<Favorites> {
+    this.loggingService.log(
+      `Adding artist to favorites: ${id}`,
+      'FavoritesService',
+    );
     const artist = await this.artistService.findById(id);
 
     if (!artist) {
+      this.loggingService.warn(
+        `Artist not found when adding to favorites: ${id}`,
+        'FavoritesService',
+      );
       throw new HttpException(
         ErrorMessage.ArtistNotFound,
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -139,6 +183,15 @@ export class FavoritesService {
           favoriteArtists: [...favorites.favoriteArtists, id],
         },
       });
+      this.loggingService.log(
+        `Artist added to favorites successfully: ${id}`,
+        'FavoritesService',
+      );
+    } else {
+      this.loggingService.debug(
+        `Artist already in favorites: ${id}`,
+        'FavoritesService',
+      );
     }
 
     const updated = await this.getOrCreateFavorites();
@@ -150,9 +203,17 @@ export class FavoritesService {
   }
 
   async deleteArtistFromFavorites(id: string): Promise<void> {
+    this.loggingService.log(
+      `Removing artist from favorites: ${id}`,
+      'FavoritesService',
+    );
     const artist = await this.artistService.findById(id);
 
     if (!artist) {
+      this.loggingService.warn(
+        `Artist not found when removing from favorites: ${id}`,
+        'FavoritesService',
+      );
       throw new HttpException(
         ErrorMessage.ArtistNotFound,
         HttpStatus.NOT_FOUND,
@@ -170,12 +231,24 @@ export class FavoritesService {
         favoriteArtists: updatedArtists,
       },
     });
+    this.loggingService.log(
+      `Artist removed from favorites successfully: ${id}`,
+      'FavoritesService',
+    );
   }
 
   async addAlbumToFavorites(id: string): Promise<Favorites> {
+    this.loggingService.log(
+      `Adding album to favorites: ${id}`,
+      'FavoritesService',
+    );
     const album = await this.albumService.findById(id);
 
     if (!album) {
+      this.loggingService.warn(
+        `Album not found when adding to favorites: ${id}`,
+        'FavoritesService',
+      );
       throw new HttpException(
         ErrorMessage.AlbumNotFound,
         HttpStatus.UNPROCESSABLE_ENTITY,
@@ -191,6 +264,15 @@ export class FavoritesService {
           favoriteAlbums: [...favorites.favoriteAlbums, id],
         },
       });
+      this.loggingService.log(
+        `Album added to favorites successfully: ${id}`,
+        'FavoritesService',
+      );
+    } else {
+      this.loggingService.debug(
+        `Album already in favorites: ${id}`,
+        'FavoritesService',
+      );
     }
 
     const updated = await this.getOrCreateFavorites();
@@ -202,9 +284,17 @@ export class FavoritesService {
   }
 
   async deleteAlbumFromFavorites(id: string): Promise<void> {
+    this.loggingService.log(
+      `Removing album from favorites: ${id}`,
+      'FavoritesService',
+    );
     const album = await this.albumService.findById(id);
 
     if (!album) {
+      this.loggingService.warn(
+        `Album not found when removing from favorites: ${id}`,
+        'FavoritesService',
+      );
       throw new HttpException(ErrorMessage.AlbumNotFound, HttpStatus.NOT_FOUND);
     }
 
@@ -219,5 +309,9 @@ export class FavoritesService {
         favoriteAlbums: updatedAlbums,
       },
     });
+    this.loggingService.log(
+      `Album removed from favorites successfully: ${id}`,
+      'FavoritesService',
+    );
   }
 }
