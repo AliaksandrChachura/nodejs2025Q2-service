@@ -13,7 +13,10 @@ export class AlbumService {
   async findAll(): Promise<Album[]> {
     this.loggingService.debug('Fetching all albums', 'AlbumService');
     const albums = await this.prisma.album.findMany();
-    this.loggingService.verbose(`Found ${albums.length} albums`, 'AlbumService');
+    this.loggingService.verbose(
+      `Found ${albums.length} albums`,
+      'AlbumService',
+    );
     return albums.map((album) => ({
       id: album.id,
       name: album.name,
@@ -29,7 +32,10 @@ export class AlbumService {
     });
 
     if (!album) {
-      this.loggingService.warn(`Album not found with id: ${id}`, 'AlbumService');
+      this.loggingService.warn(
+        `Album not found with id: ${id}`,
+        'AlbumService',
+      );
       return null;
     }
 
@@ -42,7 +48,10 @@ export class AlbumService {
   }
 
   async create(album: Album): Promise<Album> {
-    this.loggingService.log(`Creating new album: ${album.name}`, 'AlbumService');
+    this.loggingService.log(
+      `Creating new album: ${album.name}`,
+      'AlbumService',
+    );
     try {
       const createdAlbum = await this.prisma.album.create({
         data: {

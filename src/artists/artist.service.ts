@@ -13,7 +13,10 @@ export class ArtistService {
   async findAll(): Promise<Artist[]> {
     this.loggingService.debug('Fetching all artists', 'ArtistService');
     const artists = await this.prisma.artist.findMany();
-    this.loggingService.verbose(`Found ${artists.length} artists`, 'ArtistService');
+    this.loggingService.verbose(
+      `Found ${artists.length} artists`,
+      'ArtistService',
+    );
     return artists.map((artist) => ({
       id: artist.id,
       name: artist.name,
@@ -22,13 +25,19 @@ export class ArtistService {
   }
 
   async findById(id: string): Promise<Artist | null> {
-    this.loggingService.debug(`Fetching artist with id: ${id}`, 'ArtistService');
+    this.loggingService.debug(
+      `Fetching artist with id: ${id}`,
+      'ArtistService',
+    );
     const artist = await this.prisma.artist.findUnique({
       where: { id },
     });
 
     if (!artist) {
-      this.loggingService.warn(`Artist not found with id: ${id}`, 'ArtistService');
+      this.loggingService.warn(
+        `Artist not found with id: ${id}`,
+        'ArtistService',
+      );
       return null;
     }
 
@@ -40,7 +49,10 @@ export class ArtistService {
   }
 
   async create(artist: Artist): Promise<Artist> {
-    this.loggingService.log(`Creating new artist: ${artist.name}`, 'ArtistService');
+    this.loggingService.log(
+      `Creating new artist: ${artist.name}`,
+      'ArtistService',
+    );
     try {
       const createdArtist = await this.prisma.artist.create({
         data: {

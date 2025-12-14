@@ -11,6 +11,7 @@ import {
   HttpException,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import type { User } from './interfaces/user.interface';
 import { generateUuid } from '../helpers/utils';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -83,10 +84,17 @@ export class UsersController {
   async create(
     @Body() createUserDto: CreateUserDto,
   ): Promise<Omit<User, 'password'>> {
+    // Hash the password before storing
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      saltRounds,
+    );
+
     const user = await this.usersService.create({
       id: generateUuid(),
       login: createUserDto.login,
-      password: createUserDto.password,
+      password: hashedPassword,
       version: 1,
       createdAt: Math.floor(Date.now() / 1000),
       updatedAt: Math.floor(Date.now() / 1000),
@@ -127,17 +135,29 @@ export class UsersController {
       throw new HttpException(ErrorMessage.UserNotFound, HttpStatus.NOT_FOUND);
     }
 
-    if (existingUser.password !== updateUserDto.oldPassword) {
+    // Compare the provided old password with the hashed password
+    const isOldPasswordValid = await bcrypt.compare(
+      updateUserDto.oldPassword,
+      existingUser.password,
+    );
+    if (!isOldPasswordValid) {
       throw new HttpException(
         ErrorMessage.InvalidPassword,
         HttpStatus.FORBIDDEN,
       );
     }
 
+    // Hash the new password before storing
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(
+      updateUserDto.newPassword,
+      saltRounds,
+    );
+
     const updatedUser = await this.usersService.update(id, {
       id,
       login: existingUser.login,
-      password: updateUserDto.newPassword,
+      password: hashedNewPassword,
       version: existingUser.version + 1,
       createdAt: existingUser.createdAt,
       updatedAt: existingUser.updatedAt, // Will be overridden by service with current timestamp

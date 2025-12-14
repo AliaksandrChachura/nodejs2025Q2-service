@@ -13,7 +13,10 @@ export class TrackService {
   async findAll(): Promise<Track[]> {
     this.loggingService.debug('Fetching all tracks', 'TrackService');
     const tracks = await this.prisma.track.findMany();
-    this.loggingService.verbose(`Found ${tracks.length} tracks`, 'TrackService');
+    this.loggingService.verbose(
+      `Found ${tracks.length} tracks`,
+      'TrackService',
+    );
     return tracks.map((track) => ({
       id: track.id,
       name: track.name,
@@ -30,7 +33,10 @@ export class TrackService {
     });
 
     if (!track) {
-      this.loggingService.warn(`Track not found with id: ${id}`, 'TrackService');
+      this.loggingService.warn(
+        `Track not found with id: ${id}`,
+        'TrackService',
+      );
       return null;
     }
 
@@ -44,7 +50,10 @@ export class TrackService {
   }
 
   async create(track: Track): Promise<Track> {
-    this.loggingService.log(`Creating new track: ${track.name}`, 'TrackService');
+    this.loggingService.log(
+      `Creating new track: ${track.name}`,
+      'TrackService',
+    );
     try {
       const createdTrack = await this.prisma.track.create({
         data: {
